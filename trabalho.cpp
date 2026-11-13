@@ -318,12 +318,13 @@ void exportarParaTXT() {
     FILE *arquivo;
     FILE *texto;
     Livro livro;
-    int total = 0;
+    int totalAtivos = 0;
+    int totalInativos = 0;
 
     arquivo = fopen(ARQUIVO_BIN, "rb");
 
     if (arquivo == NULL) {
-        cout << "Ainda nao ha livros para exportar.\n";
+        cout << "Ainda nao ha livros cadastrados.\n";
         return;
     }
 
@@ -335,21 +336,51 @@ void exportarParaTXT() {
         return;
     }
 
+    fprintf(texto, "=========================================\n");
+    fprintf(texto, "             LIVROS ATIVOS\n");
+    fprintf(texto, "=========================================\n\n");
+
     while (fread(&livro, sizeof(Livro), 1, arquivo) == 1) {
         if (livro.ativo == 1) {
             fprintf(texto, "ID: %d\n", livro.id);
             fprintf(texto, "Titulo: %s\n", livro.titulo);
             fprintf(texto, "Autor: %s\n", livro.autor);
-            fprintf(texto, "Ano: %d\n\n", livro.ano);
-            total++;
+            fprintf(texto, "Ano: %d\n", livro.ano);
+            fprintf(texto, "-----------------------------------------\n");
+            totalAtivos++;
         }
+    }
+
+    if (totalAtivos == 0) {
+        fprintf(texto, "Nenhum livro ativo.\n");
+    }
+
+    // Volta o ponteiro do arquivo binário para o início.
+    fseek(arquivo, 0, SEEK_SET);
+
+    fprintf(texto, "\n=========================================\n");
+    fprintf(texto, "            LIVROS INATIVOS\n");
+    fprintf(texto, "=========================================\n\n");
+
+    while (fread(&livro, sizeof(Livro), 1, arquivo) == 1) {
+        if (livro.ativo == 0) {
+            fprintf(texto, "ID: %d\n", livro.id);
+            fprintf(texto, "Titulo: %s\n", livro.titulo);
+            fprintf(texto, "Autor: %s\n", livro.autor);
+            fprintf(texto, "Ano: %d\n", livro.ano);
+            fprintf(texto, "-----------------------------------------\n");
+            totalInativos++;
+        }
+    }
+
+    if (totalInativos == 0) {
+        fprintf(texto, "Nenhum livro inativo.\n");
     }
 
     fclose(arquivo);
     fclose(texto);
 
-    cout << total << " livro(s) exportado(s) para "
-         << ARQUIVO_TXT << ".\n";
+    cout << "Relatorio exportado para " << ARQUIVO_TXT << ".\n";
 }
 
 // Conta quantos livros estão ativos.
